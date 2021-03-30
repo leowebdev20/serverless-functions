@@ -8,13 +8,28 @@ const airtable = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY })
 exports.handler = async (event, context) => {
     const {id} = event.queryStringParameters;
     if (id) {
-        return {
-            statusCode: 200,
-            body: 'Single Product chosen'
+        try {
+            const product = await airtable.retrieve(id)
+            if (product.error) {
+                return {
+                    statusCode: 404,
+                    body: 'Id not found!'
+                } 
+            }
+            return {
+                statusCode: 200,
+                body: JSON.stringify(product),
+            }
+        } catch (error) {
+            console.log(error);
+            return {
+                statusCode: 500,
+                body: 'Server Error'
+            } 
         }
     }
     return {
         statusCode: 400,
-        body: 'Provide product id!'
+        body: 'Please provide product id'
     } 
 } 
